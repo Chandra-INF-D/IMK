@@ -1,0 +1,70 @@
+@startuml Interaction Mengisi Kuesioner 2
+autonumber
+skinparam SequenceMessageAlignment center
+
+actor "Guest" as A
+participant "<<boundary\nDetail_Kuesioner" as detail
+participant "<<boundary\nHalaman_Kuesioner" as halaman    
+participant "<<control\nPostController" as pcontrol
+participant "<<control\nCaptchaController" as ccontrol
+participant "<<entity\nQuestionnaire" as q
+participant "<<entity\nQuestion" as qn
+participant "<<entity\nAnswer" as a
+participant "<<entity\nRespondent" as r
+
+group Seq Mengisi Kuesioner
+
+
+    group Melihat Halaman Kuesioner
+        A->detail: Mengisi Captcha dan menekan \ntombol mulai pada halaman detail
+        activate detail
+        detail -> ccontrol : Verifikasi Captcha
+        deactivate detail
+        activate ccontrol
+        ccontrol -> halaman : Captcha Benar
+        activate halaman
+        group alternative 
+            ccontrol --> detail: Captcha Salah
+            deactivate ccontrol
+            activate detail
+            detail --> A: Tampilan Tulisan Captcha Salah
+            deactivate detail
+        end
+        halaman-> pcontrol: Kirim perintah ambil data Questionnaire dan Question
+        activate pcontrol
+
+        pcontrol->q: getQuestionnaire()
+        activate q
+        pcontrol->qn: getQuestionnaire()
+        deactivate pcontrol
+        activate qn
+        q-->halaman: Terimna Data Questionnaire
+        deactivate q
+        qn-->halaman: Terima Data Question
+        deactivate qn
+
+    end
+
+    halaman -> pcontrol: Mengsubmit jawaban
+        deactivate halaman
+    activate pcontrol
+    pcontrol -> r: createRespondent()
+    activate r
+    pcontrol -> a: createAnswer()
+    activate a
+
+    r-->pcontrol: Responden berhasil ditambah
+    deactivate r
+    a-->pcontrol: Jawaban berhasil ditambah
+    deactivate a
+
+    pcontrol-->halaman: Tampilan Notifikasi berhasil mengisi kuesioner
+    activate halaman
+    deactivate halaman
+    deactivate pcontrol
+    
+
+end
+
+
+@enduml

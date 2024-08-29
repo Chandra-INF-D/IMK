@@ -1,0 +1,143 @@
+@startuml Interaction Kelola Data 2
+autonumber
+' skinparam style strictuml
+skinparam SequenceMessageAlignment center
+group Interaction Kelola Kuesioner
+
+    actor Admin 
+    participant "<<boundary>>\nList_Kuesioner" as list
+    participant "<<boundary>>\nDetail_List_Kuesioner" as dlist
+    participant "<<boundary>>\nCreate_Questionnaire" as tquestionnaire
+    participant "<<boundary>>\nTambah_Question" as tquestion
+    participant "<<boundary>>\nEdit_Questionnaire" as equestionnaire
+    participant "<<boundary>>\nCetak_Questionnaire" as cetak
+    participant "<<control>>\nDashboardQuiz\nController" as dqcontrol
+    participant "<<control>>\nController" as control
+    participant "<<entity>>\nquestionnaire" as questioner
+    participant "<<entity>>\nquestion" as question
+    participant "<<entity>>\nrespondent" as respondent
+    participant "<<entity>>\nanswer" as answer
+
+
+
+    group Seq Membuat Kuesioner
+        Admin-> list: Membuka halaman list kuesioner
+        activate list
+            list-> tquestionnaire: Mengklik tombol Tambah Kuesioner
+        deactivate list
+
+        activate tquestionnaire
+            tquestionnaire-> tquestion: Mengklik create post
+        deactivate tquestionnaire
+
+        activate tquestion
+            tquestion-> control: tampilTambahQuestion()
+            activate control
+                control--> tquestion: Tampil form create question
+            deactivate control
+            tquestion-> dqcontrol: tambahQuestion()
+            activate dqcontrol
+        dqcontrol-> questioner: create()
+        activate questioner
+            tquestion-> dqcontrol: tambahQuestionnaire()
+        deactivate tquestion
+        dqcontrol-> question: input()
+        activate question
+        questioner--> dqcontrol: Berhasil ditambah
+        deactivate questioner
+        question--> dqcontrol: Berhasil ditambah
+        deactivate question
+        dqcontrol--> list: Notifikasi berhasil menambahkan
+        activate list
+        deactivate list
+        deactivate dqcontrol
+    end
+    
+    group Seq Mengedit Kuesioner
+        Admin->dlist: Membuka halaman detail list kuesioner
+        activate dlist
+            dlist-> equestionnaire: Mengklik tombol Edit Kuesioner
+        deactivate dlist
+        activate equestionnaire
+        equestionnaire-> dqcontrol: tampilEditQuestionnaire()
+            activate dqcontrol
+                dqcontrol--> equestionnaire: tampilFormEditQuestionnaire()
+            deactivate dqcontrol
+        equestionnaire-> dqcontrol: editQuestionnaire()
+        activate dqcontrol
+        dqcontrol-> questioner: update()
+        activate questioner
+        equestionnaire-> dqcontrol: editQuestion()
+        deactivate equestionnaire
+        dqcontrol-> question: update()
+        activate question
+        questioner--> dqcontrol: Berhasil diupdate
+        deactivate questioner
+        question--> dqcontrol: Berhasil diupdate
+        deactivate question
+        dqcontrol--> dlist: Notifikasi berhasil mengedit
+        activate dlist
+        deactivate dlist
+        deactivate dqcontrol
+    end
+
+    group Seq Menghapus Kuesioner
+        Admin-> dlist: Membuka halaman detail list kuesioner
+        activate dlist
+                dlist-> dlist: Mengklik tombol Hapus Kuesioner
+            activate dlist
+                dlist-> dqcontrol: hapusQuestionnaire()
+            deactivate dlist
+            
+            activate dqcontrol
+                dqcontrol-> questioner: delete()
+            activate questioner
+                dqcontrol-> question: delete()
+            activate question
+                questioner--> dqcontrol: Berhasil dihapus
+            deactivate questioner
+                question--> dqcontrol: Berhasil dihapus
+            deactivate question
+                dqcontrol--> dlist: Notifikasi berhasil menghapus
+            deactivate dqcontrol
+        deactivate dlist
+    end
+
+    group Seq Mencetak Kuesioner
+        Admin-> dlist: Membuka halaman detail list kuesioner
+        activate dlist
+            dlist-> cetak: Mengklik tombol Cetak Kuesioner
+        deactivate dlist
+        activate cetak
+            cetak-> control: Kirim perintah ambil data questionnaire,\nquestion, respondent, answer
+            activate control
+                control -> questioner: getQuestionnaire()
+                activate questioner
+                control -> question: getQuestion()
+                activate question
+                control -> respondent: getRespondent()
+                activate respondent
+                control -> answer: getAnswer()
+                activate answer
+
+                questioner--> control: Terima data Questionnaire
+                deactivate questioner
+                question--> control: Terima data Question
+                deactivate question
+                respondent--> control: Terima data Respondent
+                deactivate respondent
+                activate control
+                control -> control: Hitung jumlah Respondent
+                deactivate control
+                answer--> control: Terima data Answer
+                deactivate answer
+                activate control
+                control -> control: Hitung jumlah Answer
+                deactivate control
+
+
+                control--> cetak: Tampilkan tampilan cetak kuesioner
+            deactivate control
+    end
+end
+@enduml

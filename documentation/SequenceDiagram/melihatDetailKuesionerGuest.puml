@@ -1,0 +1,27 @@
+@startuml Interaction Melihat Detail Kuesioner 2
+autonumber
+' skinparam SequenceMessageAlignment center
+
+actor "Guest" as A
+participant "<<boundary>>\nDetail_Kuesioner" as detail
+participant "<<control>>\nPostController" as pcontrol
+participant "<<entity>>\nQuestionnaire" as q
+participant "<<entity>>\nQuestion" as qn      
+        group Seq Melihat Detail Kuesioner Guest
+            A -> detail: Menekan tombol Pilih Kuesioner
+            activate detail
+                detail -> pcontrol: Kirim perintah ambil data\nquestionnaire dan question
+                activate pcontrol
+                pcontrol -> q: getQuestionnaire()
+                activate q
+                pcontrol -> qn: getQuestion()
+                activate qn
+                q --> pcontrol: Terima data kuesioner()
+                deactivate q
+                qn --> pcontrol: Terima data pertanyaan()
+                deactivate qn
+                pcontrol--> detail: Tampil Detail Kuesioner
+                deactivate pcontrol
+            deactivate detail
+        end
+@enduml
